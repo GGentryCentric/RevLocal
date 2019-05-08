@@ -1,0 +1,283 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory Name"
+		},
+		"ASDB_ODS": {
+			"type": "string"
+		},
+		"funapp": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/RevLocal-Dev-BI-ODS_v3')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Execute_ODS_Load",
+						"type": "ExecuteSSISPackage",
+						"dependsOn": [
+							{
+								"activity": "Start IR",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 10,
+							"retryIntervalInSeconds": 300,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"packageLocation": {
+								"packagePath": "Revlocal-Analytics/Staging to ODS/ControlMaster.dtsx"
+							},
+							"loggingLevel": "Basic",
+							"environmentPath": "./Staging_To_ODS_DEV",
+							"connectVia": {
+								"referenceName": "RevLocalIntegrationRuntime",
+								"type": "IntegrationRuntimeReference"
+							}
+						}
+					},
+					{
+						"name": "Start IR",
+						"type": "WebActivity",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 5,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"url": "https://s1events.azure-automation.net/webhooks?token=bvHj2LLm64%2fXTJiAVucwNeM6mpYb4oUNHp7LrVaqQqs%3d",
+							"method": "POST",
+							"body": {
+								"message": "hello world"
+							}
+						}
+					},
+					{
+						"name": "Stop IR",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Execute_ODS_Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 5,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"url": "https://s1events.azure-automation.net/webhooks?token=Add%2bbMgzZ3oMU2Yen8%2fZe27b3%2fOwh2o4Mk3%2fMpelbRU%3d",
+							"method": "POST",
+							"body": {
+								"message": "hello world"
+							}
+						}
+					},
+					{
+						"name": "Notify Error",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Execute_ODS_Load",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"url": "https://prod-22.eastus.logic.azure.com:443/workflows/ffbd4cab2a7c492e9f85f57156f70838/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wtC5ZG0F8EXuGM1A9J6558BZZckY3N7ZlKyJhQhD8Xo",
+							"method": "POST",
+							"body": {
+								"DataFactoryName": "@{pipeline().DataFactory}",
+								"PipelineName": "@{pipeline().Pipeline}",
+								"Message": "Staging to ODS Load - @{activity('Execute_ODS_Load').Error}",
+								"EmailTo": "@pipeline().parameters.var_email_address",
+								"Subject": "Data Load ERROR || @{pipeline().DataFactory} || @{pipeline().Pipeline}"
+							}
+						}
+					},
+					{
+						"name": "Notify Success",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Stop IR",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"url": "https://prod-22.eastus.logic.azure.com:443/workflows/ffbd4cab2a7c492e9f85f57156f70838/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wtC5ZG0F8EXuGM1A9J6558BZZckY3N7ZlKyJhQhD8Xo",
+							"method": "POST",
+							"body": {
+								"DataFactoryName": "@{pipeline().DataFactory}",
+								"PipelineName": "@{pipeline().Pipeline}",
+								"Message": "Data Load SUCCESS",
+								"EmailTo": "@pipeline().parameters.var_email_address",
+								"Subject": "Data Load SUCCESS || @{pipeline().DataFactory} || @{pipeline().Pipeline}"
+							}
+						}
+					},
+					{
+						"name": "Execute_Calendar_Refresh",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Execute_ODS_Load",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"storedProcedureName": "[concat('[', 'dbo].[calendar_index_refresh_wrapper]')]"
+						},
+						"linkedServiceName": {
+							"referenceName": "[parameters('ASDB_ODS')]",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Process_Cube",
+						"type": "AzureFunctionActivity",
+						"dependsOn": [
+							{
+								"activity": "Execute_Calendar_Refresh",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.00:30:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 300,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"functionName": "ProcessTabularCube",
+							"method": "POST"
+						},
+						"linkedServiceName": {
+							"referenceName": "[parameters('funapp')]",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Notify Cube Processing Error",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Process_Cube",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"url": "https://prod-22.eastus.logic.azure.com:443/workflows/ffbd4cab2a7c492e9f85f57156f70838/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wtC5ZG0F8EXuGM1A9J6558BZZckY3N7ZlKyJhQhD8Xo",
+							"method": "POST",
+							"body": {
+								"DataFactoryName": "@{pipeline().DataFactory}",
+								"PipelineName": "@{pipeline().Pipeline}",
+								"Message": "Cube Processing - @{activity('Process_Cube').Error}",
+								"EmailTo": "@pipeline().parameters.var_email_address",
+								"Subject": "Cube Processing ERROR || @{pipeline().DataFactory} || @{pipeline().Pipeline}"
+							}
+						}
+					},
+					{
+						"name": "Notify Cube Processing Success",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Process_Cube",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"url": "https://prod-22.eastus.logic.azure.com:443/workflows/ffbd4cab2a7c492e9f85f57156f70838/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=wtC5ZG0F8EXuGM1A9J6558BZZckY3N7ZlKyJhQhD8Xo",
+							"method": "POST",
+							"body": {
+								"DataFactoryName": "@{pipeline().DataFactory}",
+								"PipelineName": "@{pipeline().Pipeline}",
+								"Message": "Cube Processing SUCCESS",
+								"EmailTo": "@pipeline().parameters.var_email_address",
+								"Subject": "Cube Processing SUCCESS || @{pipeline().DataFactory} || @{pipeline().Pipeline}"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"var_email_address": {
+						"type": "String",
+						"defaultValue": "paras.madan@centricconsulting.com"
+					}
+				}
+			}
+		}
+	]
+}
