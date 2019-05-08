@@ -1,5 +1,5 @@
 {
-	"name": "SFActivityLog",
+	"name": "SFPriceBook2",
 	"properties": {
 		"activities": [
 			{
@@ -93,7 +93,7 @@
 					"secureInput": false
 				},
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[Del_Source_Activity_Log__c]"
+					"storedProcedureName": "[dbo].[Del_Source_Pricebook2]"
 				},
 				"linkedServiceName": {
 					"referenceName": "SalesForce_Staging",
@@ -121,7 +121,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SalesforceSource",
-						"query": "select \tAdditionalNoPayDemosCompleted__c\n\t\t, AppointmentsScheduled__c\n\t\t, ContactsMade__c\n\t\t, CreatedById\n\t\t, CreatedDate\n\t\t, CustomersSold__c\n\t\t, Date__c\n\t\t, DemosCompleted__c\n\t\t, DropinsPerformed__c\n\t\t, FollowupDemosCompleted__c\n\t\t, Id\n\t\t, IsDeleted\n\t\t, LastModifiedById\n\t\t, LastModifiedDate\n\t\t, LastReferencedDate\n\t\t, LastViewedDate\n\t\t, MonthlyUnitGoal__c\n\t\t, Name\n\t\t, NewSalesUnitsAcquired__c\n\t\t, OwnerId\n\t\t, PhoneCallsMade__c\n\t\t, Prospect_Emails_Sent__c\n\t\t, ReferralsReceived__c\n\t\t, SystemModstamp\n\t\t, UpgradeSalesUnitsAcquired__c\n\t\t, WeeklyUnitGoal__c\nfrom Activity_Log__c",
+						"query": "select \n\tCreatedById\n\t, CreatedDate\n\t, Description\n\t, Id\n\t, IsActive\n\t, IsDeleted\n\t, IsStandard\n\t, LastModifiedById\n\t, LastModifiedDate\n\t, LastReferencedDate\n\t, LastViewedDate\n\t, Name\n\t, SystemModstamp\nfrom Pricebook2",
 						"readBehavior": "query"
 					},
 					"sink": {
@@ -138,7 +138,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "Source_ActivityLog",
+						"referenceName": "Source_PriceBook2",
 						"type": "DatasetReference"
 					}
 				]
@@ -208,7 +208,7 @@
 					"secureInput": false
 				},
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[StageActivity_Log__c]",
+					"storedProcedureName": "[dbo].[StagePriceBook2]",
 					"storedProcedureParameters": {
 						"PipeLineRunID": {
 							"value": {
@@ -243,7 +243,7 @@
 					"secureInput": false
 				},
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[ProcessActivity_Log__c]",
+					"storedProcedureName": "[dbo].[ProcessPriceBook2]",
 					"storedProcedureParameters": {
 						"PipeLineRunID": {
 							"value": {

@@ -6,7 +6,7 @@
 				"name": "SetPipeLineRunID",
 				"type": "SetVariable",
 				"typeProperties": {
-					"variableName": "PipeLineRunID",
+					"variableName": "PipeLineRunId",
 					"value": {
 						"value": "@pipeline().RunId",
 						"type": "Expression"
@@ -33,7 +33,7 @@
 				}
 			},
 			{
-				"name": "InsertPipeLineLog",
+				"name": "InsertLog",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
@@ -62,7 +62,7 @@
 						},
 						"PipeLineRunId": {
 							"value": {
-								"value": "@variables('PipeLineRunID')",
+								"value": "@variables('PipeLineRunId')",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -70,96 +70,58 @@
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase1",
+					"referenceName": "SalesForce_Staging",
 					"type": "LinkedServiceReference"
 				}
 			},
 			{
-				"name": "AccountHistory",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "InsertPipeLineLog",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "SFClientAccountHistory",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "Plan",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "InsertPipeLineLog",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "SFClientPlan",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "UpdPipeLineLog",
+				"name": "Log_Complete",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "Industry",
+						"activity": "SFPriceBook2",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					},
 					{
-						"activity": "OpportunityLineItem",
+						"activity": "SFUser",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					},
 					{
-						"activity": "Product2",
+						"activity": "SFProduct2",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					},
 					{
-						"activity": "PriceBookEntry",
+						"activity": "SFPriceBookEntry",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					},
 					{
-						"activity": "CallTracking",
+						"activity": "SFOpportunityLineItem",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					},
 					{
-						"activity": "PriceBook2",
+						"activity": "SFPlanLocation",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					},
 					{
-						"activity": "PlanLocation",
+						"activity": "SFIndustry",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					},
 					{
-						"activity": "User",
+						"activity": "SFCallTracking",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -184,7 +146,7 @@
 						},
 						"PipeLineRunId": {
 							"value": {
-								"value": "@variables('PipeLineRunID')",
+								"value": "@variables('PipeLineRunId')",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -196,16 +158,16 @@
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase1",
+					"referenceName": "SalesForce_Staging",
 					"type": "LinkedServiceReference"
 				}
 			},
 			{
-				"name": "Account",
+				"name": "SFClientAccount",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "InsertPipeLineLog",
+						"activity": "InsertLog",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -220,11 +182,11 @@
 				}
 			},
 			{
-				"name": "Industry",
+				"name": "SFPriceBook2",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Location",
+						"activity": "SFClientAccount",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -232,18 +194,37 @@
 				],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "SFIndustry",
+						"referenceName": "SFPriceBook2",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
 				}
 			},
 			{
-				"name": "User",
+				"name": "SFClientAccountHistory",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "AccountHistory",
+						"activity": "InsertLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFClientAccountHistory",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SFUser",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SFClientAccountHistory",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -258,106 +239,11 @@
 				}
 			},
 			{
-				"name": "Product2",
+				"name": "SFOpportunity",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Opportunity",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "SFProduct2",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "PriceBookEntry",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "PlanHistory",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "SFPriceBookEntry",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "PriceBook2",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Account",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "SFPricebook2",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "ActivityLog",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "InsertPipeLineLog",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "SFActivityLog",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "PlanHistory",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "InsertPipeLineLog",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "SFPlanHistory",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "Opportunity",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "InsertPipeLineLog",
+						"activity": "InsertLog",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -372,11 +258,68 @@
 				}
 			},
 			{
-				"name": "Lead",
+				"name": "SFProduct2",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "InsertPipeLineLog",
+						"activity": "SFOpportunity",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFProduct2",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SFPlanHistory",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "InsertLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFPlanHistory",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SFPriceBookEntry",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SFPlanHistory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFPriceBookEntry",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SFLead",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "InsertLog",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -391,11 +334,11 @@
 				}
 			},
 			{
-				"name": "OpportunityLineItem",
+				"name": "SFOpportunityLineItem",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Lead",
+						"activity": "SFLead",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -410,11 +353,30 @@
 				}
 			},
 			{
-				"name": "PlanLocation",
+				"name": "SFClientPlan",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Plan",
+						"activity": "InsertLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFClientPlan",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SFPlanLocation",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SFClientPlan",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -429,11 +391,11 @@
 				}
 			},
 			{
-				"name": "Event",
+				"name": "SFEvent",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "InsertPipeLineLog",
+						"activity": "InsertLog",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -448,11 +410,68 @@
 				}
 			},
 			{
-				"name": "Contact",
+				"name": "SFLocation",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ActivityLog",
+						"activity": "SFEvent",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFLocation",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SFIndustry",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SFLocation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFIndustry",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SFActivityLog",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "InsertLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFActivityLog",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "SFContact",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SFActivityLog",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -467,11 +486,11 @@
 				}
 			},
 			{
-				"name": "CallTracking",
+				"name": "SFCallTracking",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Contact",
+						"activity": "SFContact",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -486,11 +505,11 @@
 				}
 			},
 			{
-				"name": "Location",
+				"name": "RevLocal_BI_ODS",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Event",
+						"activity": "Log_Complete",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -498,7 +517,7 @@
 				],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "SFLocation",
+						"referenceName": "RevLocal_BI_ODS",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
@@ -506,7 +525,7 @@
 			}
 		],
 		"variables": {
-			"PipeLineRunID": {
+			"PipeLineRunId": {
 				"type": "String"
 			},
 			"PipeLineName": {

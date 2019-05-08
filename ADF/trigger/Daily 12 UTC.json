@@ -1,0 +1,29 @@
+{
+	"name": "Daily 12 UTC",
+	"properties": {
+		"description": "This will run Daily at 12:00 UTC",
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "SFMaster",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2019-05-02T14:23:00Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"hours": [
+						12
+					]
+				}
+			}
+		}
+	}
+}

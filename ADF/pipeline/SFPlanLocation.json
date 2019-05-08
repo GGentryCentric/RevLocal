@@ -6,7 +6,7 @@
 				"name": "SetPipeLineRunID",
 				"type": "SetVariable",
 				"typeProperties": {
-					"variableName": "PipeLineRunID",
+					"variableName": "PipeLineRunId",
 					"value": {
 						"value": "@pipeline().RunId",
 						"type": "Expression"
@@ -33,7 +33,49 @@
 				}
 			},
 			{
-				"name": "Del_Source_PlanLocation",
+				"name": "InsertLog",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "SetPipeLineName",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[InsPipeLineLog]",
+					"storedProcedureParameters": {
+						"PipeLineName": {
+							"value": {
+								"value": "@variables('PipeLineName')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipeLineRunId": {
+							"value": {
+								"value": "@variables('PipeLineRunId')",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "SalesForce_Staging",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Del_Source",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
@@ -54,16 +96,16 @@
 					"storedProcedureName": "[dbo].[Del_Source_PlanLocation__c]"
 				},
 				"linkedServiceName": {
-					"referenceName": "SF_Prod_DB",
+					"referenceName": "SalesForce_Staging",
 					"type": "LinkedServiceReference"
 				}
 			},
 			{
-				"name": "Source_PlanLocation",
+				"name": "Source",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Del_Source_PlanLocation",
+						"activity": "Del_Source",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -90,7 +132,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "SF_Connection",
+						"referenceName": "SalesForce_Connection",
 						"type": "DatasetReference"
 					}
 				],
@@ -102,11 +144,57 @@
 				]
 			},
 			{
-				"name": "StagePlanLocation",
+				"name": "ErrorLog_Del",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "Source_PlanLocation",
+						"activity": "Del_Source",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[UpdPipeLineLog]",
+					"storedProcedureParameters": {
+						"PipeLineName": {
+							"value": {
+								"value": "@variables('PipeLineName')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipeLineRunId": {
+							"value": {
+								"value": "@variables('PipeLineRunId')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipeLineStatus": {
+							"value": "Error",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "SalesForce_Staging",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Stage",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Source",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -122,9 +210,9 @@
 				"typeProperties": {
 					"storedProcedureName": "[dbo].[StagePlanLocationc]",
 					"storedProcedureParameters": {
-						"PipeLineRunId": {
+						"PipeLineRunID": {
 							"value": {
-								"value": "@variables('PipeLineRunID')",
+								"value": "@variables('PipeLineRunId')",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -132,150 +220,16 @@
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "SF_Prod_DB",
+					"referenceName": "SalesForce_Staging",
 					"type": "LinkedServiceReference"
 				}
 			},
 			{
-				"name": "InsertLog",
+				"name": "Process",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "SetPipeLineName",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"typeProperties": {
-					"storedProcedureName": "[dbo].[InsPipeLineLog]",
-					"storedProcedureParameters": {
-						"PipeLineName": {
-							"value": {
-								"value": "@pipeline().Pipeline",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"PipeLineRunId": {
-							"value": {
-								"value": "@pipeline().RunId",
-								"type": "Expression"
-							},
-							"type": "String"
-						}
-					}
-				},
-				"linkedServiceName": {
-					"referenceName": "SF_Prod_DB",
-					"type": "LinkedServiceReference"
-				}
-			},
-			{
-				"name": "Log Successful",
-				"type": "SqlServerStoredProcedure",
-				"dependsOn": [
-					{
-						"activity": "ProcessPlanLocation",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"typeProperties": {
-					"storedProcedureName": "[dbo].[UpdPipeLineLog]",
-					"storedProcedureParameters": {
-						"PipeLineName": {
-							"value": {
-								"value": "@pipeline().Pipeline",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"PipeLineRunId": {
-							"value": {
-								"value": "@pipeline().RunId",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"PipeLineStatus": {
-							"value": "Complete",
-							"type": "String"
-						}
-					}
-				},
-				"linkedServiceName": {
-					"referenceName": "SF_Prod_DB",
-					"type": "LinkedServiceReference"
-				}
-			},
-			{
-				"name": "ErrorLog_Stage",
-				"type": "SqlServerStoredProcedure",
-				"dependsOn": [
-					{
-						"activity": "StagePlanLocation",
-						"dependencyConditions": [
-							"Failed"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"typeProperties": {
-					"storedProcedureName": "[dbo].[UpdPipeLineLog]",
-					"storedProcedureParameters": {
-						"PipeLineName": {
-							"value": {
-								"value": "@pipeline().Pipeline",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"PipeLineRunId": {
-							"value": {
-								"value": "@pipeline().RunId",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"PipeLineStatus": {
-							"value": "Error\n",
-							"type": "String"
-						}
-					}
-				},
-				"linkedServiceName": {
-					"referenceName": "SF_Prod_DB",
-					"type": "LinkedServiceReference"
-				}
-			},
-			{
-				"name": "ProcessPlanLocation",
-				"type": "SqlServerStoredProcedure",
-				"dependsOn": [
-					{
-						"activity": "StagePlanLocation",
+						"activity": "Stage",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -291,9 +245,9 @@
 				"typeProperties": {
 					"storedProcedureName": "[dbo].[ProcessPlanLocationc]",
 					"storedProcedureParameters": {
-						"PipeLineRunId": {
+						"PipeLineRunID": {
 							"value": {
-								"value": "@variables('PipeLineRunID')",
+								"value": "@variables('PipeLineRunId')",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -301,53 +255,7 @@
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "AzureSqlDatabase1",
-					"type": "LinkedServiceReference"
-				}
-			},
-			{
-				"name": "ErrorLog_Del",
-				"type": "SqlServerStoredProcedure",
-				"dependsOn": [
-					{
-						"activity": "Del_Source_PlanLocation",
-						"dependencyConditions": [
-							"Failed"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"typeProperties": {
-					"storedProcedureName": "[dbo].[UpdPipeLineLog]",
-					"storedProcedureParameters": {
-						"PipeLineName": {
-							"value": {
-								"value": "@pipeline().Pipeline",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"PipeLineRunId": {
-							"value": {
-								"value": "@pipeline().RunId",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"PipeLineStatus": {
-							"value": "Error\n",
-							"type": "String"
-						}
-					}
-				},
-				"linkedServiceName": {
-					"referenceName": "SF_Prod_DB",
+					"referenceName": "SalesForce_Staging",
 					"type": "LinkedServiceReference"
 				}
 			},
@@ -356,7 +264,7 @@
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "Source_PlanLocation",
+						"activity": "Source",
 						"dependencyConditions": [
 							"Failed"
 						]
@@ -374,26 +282,72 @@
 					"storedProcedureParameters": {
 						"PipeLineName": {
 							"value": {
-								"value": "@pipeline().Pipeline",
+								"value": "@variables('PipeLineName')",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"PipeLineRunId": {
 							"value": {
-								"value": "@pipeline().RunId",
+								"value": "@variables('PipeLineRunId')",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"PipeLineStatus": {
-							"value": "Error\n",
+							"value": "Error",
 							"type": "String"
 						}
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "SF_Prod_DB",
+					"referenceName": "SalesForce_Staging",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ErrorLog_Stage",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Stage",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[UpdPipeLineLog]",
+					"storedProcedureParameters": {
+						"PipeLineName": {
+							"value": {
+								"value": "@variables('PipeLineName')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipeLineRunId": {
+							"value": {
+								"value": "@variables('PipeLineRunId')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipeLineStatus": {
+							"value": "Error",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "SalesForce_Staging",
 					"type": "LinkedServiceReference"
 				}
 			},
@@ -402,7 +356,7 @@
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "ProcessPlanLocation",
+						"activity": "Process",
 						"dependencyConditions": [
 							"Failed"
 						]
@@ -420,32 +374,78 @@
 					"storedProcedureParameters": {
 						"PipeLineName": {
 							"value": {
-								"value": "@pipeline().Pipeline",
+								"value": "@variables('PipeLineName')",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"PipeLineRunId": {
 							"value": {
-								"value": "@pipeline().RunId",
+								"value": "@variables('PipeLineRunId')",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"PipeLineStatus": {
-							"value": "Error\n",
+							"value": "Error",
 							"type": "String"
 						}
 					}
 				},
 				"linkedServiceName": {
-					"referenceName": "SF_Prod_DB",
+					"referenceName": "SalesForce_Staging",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Log_Complete",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Process",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[UpdPipeLineLog]",
+					"storedProcedureParameters": {
+						"PipeLineName": {
+							"value": {
+								"value": "@variables('PipeLineName')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipeLineRunId": {
+							"value": {
+								"value": "@variables('PipeLineRunId')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipeLineStatus": {
+							"value": "Complete",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "SalesForce_Staging",
 					"type": "LinkedServiceReference"
 				}
 			}
 		],
 		"variables": {
-			"PipeLineRunID": {
+			"PipeLineRunId": {
 				"type": "String"
 			},
 			"PipeLineName": {

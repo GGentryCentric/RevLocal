@@ -1,0 +1,28 @@
+{
+	"name": "RevLocal-BI-ODS",
+	"properties": {
+		"type": "Managed",
+		"description": "integration from staging to ODS",
+		"typeProperties": {
+			"computeProperties": {
+				"location": "East US",
+				"nodeSize": "Standard_D8_v3",
+				"numberOfNodes": 2,
+				"maxParallelExecutionsPerNode": 2
+			},
+			"ssisProperties": {
+				"catalogInfo": {
+					"catalogServerEndpoint": "sqldbmachine-revlocal-prd.database.windows.net",
+					"catalogAdminUserName": "sqlmachineadmin-revlocal-prd",
+					"catalogAdminPassword": {
+						"type": "SecureString",
+						"value": "**********"
+					},
+					"catalogPricingTier": "Basic"
+				},
+				"edition": "Standard",
+				"licenseType": "LicenseIncluded"
+			}
+		}
+	}
+}

@@ -2,7 +2,7 @@
 	"name": "Source_Opportunity",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "AzureSqlDatabase1",
+			"referenceName": "SalesForce_Staging",
 			"type": "LinkedServiceReference"
 		},
 		"type": "AzureSqlTable",

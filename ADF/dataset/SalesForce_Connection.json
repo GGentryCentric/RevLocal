@@ -1,0 +1,11 @@
+{
+	"name": "SalesForce_Connection",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SalesforceProd",
+			"type": "LinkedServiceReference"
+		},
+		"type": "SalesforceObject"
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

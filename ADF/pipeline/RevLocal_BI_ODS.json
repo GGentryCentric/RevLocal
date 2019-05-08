@@ -1,0 +1,30 @@
+{
+	"name": "RevLocal_BI_ODS",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute_ODS_Load",
+				"type": "ExecuteSSISPackage",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"packageLocation": {
+						"packagePath": "Revlocal-Analytics/Staging to ODS/ControlMaster.dtsx"
+					},
+					"loggingLevel": "Basic",
+					"environmentPath": "./Staging_To_ODS_PRD",
+					"connectVia": {
+						"referenceName": "RevLocal-BI-ODS",
+						"type": "IntegrationRuntimeReference"
+					}
+				}
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

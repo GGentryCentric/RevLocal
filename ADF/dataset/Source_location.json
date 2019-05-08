@@ -1,5 +1,5 @@
 {
-	"name": "Source_PlanLocation",
+	"name": "Source_location",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "SalesForce_Staging",
@@ -7,7 +7,7 @@
 		},
 		"type": "AzureSqlTable",
 		"typeProperties": {
-			"tableName": "[dbo].[Source_PlanLocation__c]"
+			"tableName": "[dbo].[Source_Location__c]"
 		}
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"

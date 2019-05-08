@@ -1,0 +1,34 @@
+{
+	"name": "Stop_IR",
+	"properties": {
+		"activities": [
+			{
+				"name": "StopIR",
+				"type": "WebActivity",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"url": "https://management.azure.com/subscriptions/63abed2b-8751-487e-9082-401639c65fbb/resourceGroups/RevLocal.BI/providers/Microsoft.DataFactory/factories/RevLocalDataFactory-prd/integrationRuntimes/RevLocal-BI-ODS/stop?api-version=2018-06-01",
+					"method": "POST",
+					"body": {
+						"message": "Stop Daily ODS Run"
+					},
+					"authentication": {
+						"type": "Basic",
+						"username": "sqlmachineadmin-revlocal-prd",
+						"password": {
+							"type": "SecureString",
+							"value": "**********"
+						}
+					}
+				}
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
