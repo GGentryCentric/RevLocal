@@ -1,0 +1,14 @@
+{
+	"name": "Source_PriceBookEntry",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"type": "AzureSqlTable",
+		"typeProperties": {
+			"tableName": "[dbo].[Source_PriceBookEntry]"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

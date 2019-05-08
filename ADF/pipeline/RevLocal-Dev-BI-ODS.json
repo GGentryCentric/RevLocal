@@ -1,0 +1,42 @@
+{
+	"name": "RevLocal-Dev-BI-ODS",
+	"properties": {
+		"activities": [
+			{
+				"name": "Execute_ODS_Load",
+				"type": "ExecuteSSISPackage",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"packageLocation": {
+						"packagePath": "Revlocal-Analytics/Staging to ODS/ControlMaster.dtsx"
+					},
+					"loggingLevel": "Basic",
+					"environmentPath": "./Staging_To_ODS_DEV",
+					"connectVia": {
+						"referenceName": "RevLocalIntegrationRuntime",
+						"type": "IntegrationRuntimeReference"
+					},
+					"projectParameters": {
+						"TargetDatabase": {
+							"value": "ODS"
+						}
+					},
+					"projectConnectionManagers": {
+						"Target-ODS": {
+							"ConnectionString": {
+								"value": "Data Source=sqldbmachine-revlocal.database.windows.net;User ID=pmadan;Initial Catalog=ODS;Provider=SQLNCLI11.1;Persist Security Info=True;Auto Translate=False;Packet Size=16384;"
+							}
+						}
+					}
+				}
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

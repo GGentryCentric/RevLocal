@@ -1,0 +1,14 @@
+{
+	"name": "SF_Connection",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "Salesforce1",
+			"type": "LinkedServiceReference"
+		},
+		"type": "SalesforceObject",
+		"typeProperties": {
+			"objectApiName": "Account"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

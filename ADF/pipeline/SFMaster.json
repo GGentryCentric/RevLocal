@@ -1,0 +1,518 @@
+{
+	"name": "SFMaster",
+	"properties": {
+		"activities": [
+			{
+				"name": "SetPipeLineRunID",
+				"type": "SetVariable",
+				"typeProperties": {
+					"variableName": "PipeLineRunID",
+					"value": {
+						"value": "@pipeline().RunId",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SetPipeLineName",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "SetPipeLineRunID",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"variableName": "PipeLineName",
+					"value": {
+						"value": "@pipeline().Pipeline",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "InsertPipeLineLog",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "SetPipeLineName",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[InsPipeLineLog]",
+					"storedProcedureParameters": {
+						"PipeLineName": {
+							"value": {
+								"value": "@variables('PipeLineName')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipeLineRunId": {
+							"value": {
+								"value": "@variables('PipeLineRunID')",
+								"type": "Expression"
+							},
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "AccountHistory",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "InsertPipeLineLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFClientAccountHistory",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Plan",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "InsertPipeLineLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFClientPlan",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "UpdPipeLineLog",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "Industry",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "OpportunityLineItem",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "Product2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "PriceBookEntry",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "CallTracking",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "PriceBook2",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "PlanLocation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "User",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[UpdPipeLineLog]",
+					"storedProcedureParameters": {
+						"PipeLineName": {
+							"value": {
+								"value": "@variables('PipeLineName')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipeLineRunId": {
+							"value": {
+								"value": "@variables('PipeLineRunID')",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"PipeLineStatus": {
+							"value": "Complete",
+							"type": "String"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase1",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "Account",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "InsertPipeLineLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFClientAccount",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Industry",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Location",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFIndustry",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "User",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "AccountHistory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFUser",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Product2",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Opportunity",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFProduct2",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PriceBookEntry",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "PlanHistory",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFPriceBookEntry",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PriceBook2",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Account",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFPricebook2",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ActivityLog",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "InsertPipeLineLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFActivityLog",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PlanHistory",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "InsertPipeLineLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFPlanHistory",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Opportunity",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "InsertPipeLineLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFOpportunity",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Lead",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "InsertPipeLineLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFLead",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "OpportunityLineItem",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Lead",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFOpportunityLineItem",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "PlanLocation",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Plan",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFPlanLocation",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Event",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "InsertPipeLineLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFEvent",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Contact",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ActivityLog",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFContact",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "CallTracking",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Contact",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFCallTracking",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Location",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Event",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "SFLocation",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"variables": {
+			"PipeLineRunID": {
+				"type": "String"
+			},
+			"PipeLineName": {
+				"type": "String"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

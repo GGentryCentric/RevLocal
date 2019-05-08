@@ -1,0 +1,14 @@
+{
+	"name": "Source_Account",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"type": "AzureSqlTable",
+		"typeProperties": {
+			"tableName": "Source_Account"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

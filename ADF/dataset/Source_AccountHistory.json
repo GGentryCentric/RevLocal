@@ -1,0 +1,14 @@
+{
+	"name": "Source_AccountHistory",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"type": "AzureSqlTable",
+		"typeProperties": {
+			"tableName": "[dbo].[Source_AccountHistory]"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

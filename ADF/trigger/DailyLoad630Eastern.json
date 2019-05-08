@@ -1,0 +1,35 @@
+{
+	"name": "DailyLoad630Eastern",
+	"properties": {
+		"description": "Daily data load process scheduled to run at 6:30 am eastern time which stand 10:30 am UTC time",
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "RevLocal-Dev-BI-ODS_v2",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"var_email_address": "paras.madan@centricconsulting.com; art.smith@centricconsulting.com"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2019-03-29T10:30:00Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						30
+					],
+					"hours": [
+						10
+					]
+				}
+			}
+		}
+	}
+}

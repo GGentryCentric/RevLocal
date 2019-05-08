@@ -1,0 +1,14 @@
+{
+	"name": "Source_CallTracking",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"type": "AzureSqlTable",
+		"typeProperties": {
+			"tableName": "[dbo].[source_CallTracking__c]"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

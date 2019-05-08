@@ -1,0 +1,14 @@
+{
+	"name": "Source_PlanLocation",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"type": "AzureSqlTable",
+		"typeProperties": {
+			"tableName": "[dbo].[Source_PlanLocation__c]"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

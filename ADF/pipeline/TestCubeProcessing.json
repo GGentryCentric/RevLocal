@@ -1,0 +1,50 @@
+{
+	"name": "TestCubeProcessing",
+	"properties": {
+		"activities": [
+			{
+				"name": "Web1",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "AzureFunctionActivity1",
+						"dependencyConditions": [
+							"Skipped"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.01:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 1200,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"url": "https://revlocal-funapp.azurewebsites.net/api/ProcessTabularCube?code=XTGuMjt2VLmGjsgmPbOvQnHd7qUUf4lNxOBEk7zcyGUq7VKAoXvZyg==",
+					"method": "POST"
+				}
+			},
+			{
+				"name": "AzureFunctionActivity1",
+				"type": "AzureFunctionActivity",
+				"policy": {
+					"timeout": "0.00:30:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 900,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"functionName": "ProcessTabularCube",
+					"method": "POST"
+				},
+				"linkedServiceName": {
+					"referenceName": "funapp",
+					"type": "LinkedServiceReference"
+				}
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

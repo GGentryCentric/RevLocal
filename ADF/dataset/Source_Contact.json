@@ -1,0 +1,14 @@
+{
+	"name": "Source_Contact",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabase1",
+			"type": "LinkedServiceReference"
+		},
+		"type": "AzureSqlTable",
+		"typeProperties": {
+			"tableName": "[dbo].[Source_Contact]"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
