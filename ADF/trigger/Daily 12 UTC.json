@@ -2,7 +2,7 @@
 	"name": "Daily 12 UTC",
 	"properties": {
 		"description": "This will run Daily at 12:00 UTC",
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
