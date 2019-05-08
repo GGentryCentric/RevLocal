@@ -1,0 +1,13 @@
+{
+	"name": "Source_ActivityLog1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SalesForce_Staging",
+			"type": "LinkedServiceReference"
+		},
+		"type": "AzureSqlTable",
+		"typeProperties": {
+			"tableName": "[dbo].[Source_Activity_Log__c]"
+		}
+	}
+}

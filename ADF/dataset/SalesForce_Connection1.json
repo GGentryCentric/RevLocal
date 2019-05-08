@@ -1,0 +1,10 @@
+{
+	"name": "SalesForce_Connection1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SalesforceProd",
+			"type": "LinkedServiceReference"
+		},
+		"type": "SalesforceObject"
+	}
+}
