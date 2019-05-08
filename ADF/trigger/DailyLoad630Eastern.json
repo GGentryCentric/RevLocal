@@ -2,7 +2,7 @@
 	"name": "DailyLoad630Eastern",
 	"properties": {
 		"description": "Daily data load process scheduled to run at 6:30 am eastern time which stand 10:30 am UTC time",
-		"runtimeState": "Started",
+		"runtimeState": "Stopped",
 		"pipelines": [
 			{
 				"pipelineReference": {
