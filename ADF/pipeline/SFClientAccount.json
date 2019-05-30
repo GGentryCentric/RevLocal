@@ -121,7 +121,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SalesforceSource",
-						"query": "SELECT\tId \n\t\t, IsDeleted\t\t\t\n\t\t, Name\t\t\n\t\t, CreatedDate__c\n\t\t, StartDate__c\n\t\t, AccountStatus__c\n\t\t, Industry__c\n\t\t, RegNumber__c\n\t\t, AccountLevel__c\n\t\t, ClientHealthScore__c\t\t\n\t\t, LastActivityDate\n\t\t, LastCallDate__c\n\t\t, LastMonthlyTaskDate__c\nFROM Account ",
+						"query": "SELECT\tId \n\t\t, IsDeleted\t\t\t\n\t\t, Name\t\t\n\t\t, CreatedDate__c\n\t\t, StartDate__c\n\t\t, AccountStatus__c\n\t\t, Industry__c\n\t\t, RegNumber__c\n\t\t, AccountLevel__c\n\t\t, ClientHealthScore__c\t\t\n\t\t, LastActivityDate\n\t\t, LastCallDate__c\n\t\t, LastMonthlyTaskDate__c\n                , EndDate__c\n                , SuspensionDate__c\nFROM Account ",
 						"readBehavior": "query"
 					},
 					"sink": {
