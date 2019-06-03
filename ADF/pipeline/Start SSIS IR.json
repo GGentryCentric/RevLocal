@@ -1,0 +1,24 @@
+{
+	"name": "Start SSIS IR",
+	"properties": {
+		"activities": [
+			{
+				"name": "Start IR",
+				"description": "Start IR using Runbook",
+				"type": "WebActivity",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"url": "https://s16events.azure-automation.net/webhooks?token=vVshanRAwAsy15jGdK0nDx7HLvfAtuadFEWz6u9clGU%3d",
+					"method": "POST",
+					"body": "Body: {\"message\":\"Start IR\"}"
+				}
+			}
+		]
+	}
+}
