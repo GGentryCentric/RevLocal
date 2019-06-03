@@ -5,6 +5,14 @@
 			{
 				"name": "SetPipeLineRunID",
 				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Start SSIS IR",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"typeProperties": {
 					"variableName": "PipeLineRunId",
 					"value": {
@@ -194,7 +202,7 @@
 				],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "SFPriceBook2",
+						"referenceName": "SFPricebook2",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
@@ -518,6 +526,17 @@
 				"typeProperties": {
 					"pipeline": {
 						"referenceName": "RevLocal_BI_ODS",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Start SSIS IR",
+				"type": "ExecutePipeline",
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Start SSIS IR",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
