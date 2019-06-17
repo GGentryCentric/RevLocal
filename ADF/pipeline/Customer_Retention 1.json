@@ -1,5 +1,5 @@
 {
-	"name": "LoadAAL_TMP_Customer_Retention 1",
+	"name": "Customer_Retention 1",
 	"properties": {
 		"activities": [
 			{
@@ -26,6 +26,9 @@
 					"type": "LinkedServiceReference"
 				}
 			}
-		]
+		],
+		"folder": {
+			"name": "DataScience"
+		}
 	}
 }
