@@ -18,7 +18,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Set Variables",
+						"activity": "Setup",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -37,28 +37,16 @@
 						}
 					}
 				}
-			},
-			{
-				"name": "Set Variables",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "Setup",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"typeProperties": {
-					"variableName": "Month_One",
-					"value": "1"
-				}
 			}
 		],
 		"variables": {
 			"Month_One": {
 				"type": "String",
 				"defaultValue": "1"
+			},
+			"Month_Two": {
+				"type": "String",
+				"defaultValue": "2"
 			}
 		},
 		"folder": {

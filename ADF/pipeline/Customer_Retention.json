@@ -16,7 +16,10 @@
 					"storedProcedureName": "[DataSci].[LoadAAL_TMP_Customer_Retention]",
 					"storedProcedureParameters": {
 						"month": {
-							"value": "1",
+							"value": {
+								"value": "@pipeline().parameters.Month",
+								"type": "Expression"
+							},
 							"type": "Int64"
 						}
 					}
