@@ -1,0 +1,155 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory Name"
+		},
+		"ODS": {
+			"type": "string"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/DataSci Master')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Setup",
+						"type": "ExecutePipeline",
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Setup Calendar Month",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true
+						}
+					},
+					{
+						"name": "Customer Retention 1",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "Setup",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Customer_Retention",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Month": {
+									"value": "@variables('Month_One')",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"variables": {
+					"Month_One": {
+						"type": "String",
+						"defaultValue": "1"
+					},
+					"Month_Two": {
+						"type": "String",
+						"defaultValue": "2"
+					}
+				},
+				"folder": {
+					"name": "DataScience"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Setup Calendar Month')]",
+				"[concat(variables('factoryId'), '/pipelines/Customer_Retention')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Setup Calendar Month')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SetupCalendar_Month",
+						"type": "SqlServerStoredProcedure",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"storedProcedureName": "[[DataSci].[SetupCalendar_Month]"
+						},
+						"linkedServiceName": {
+							"referenceName": "[parameters('ODS')]",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"folder": {
+					"name": "DataScience"
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Customer_Retention')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "1_LoadAAL_TMP_Customer_Retention",
+						"type": "SqlServerStoredProcedure",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"storedProcedureName": "[[DataSci].[LoadAAL_TMP_Customer_Retention]",
+							"storedProcedureParameters": {
+								"month": {
+									"value": {
+										"value": "@pipeline().parameters.Month",
+										"type": "Expression"
+									},
+									"type": "Int64"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "[parameters('ODS')]",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"parameters": {
+					"Month": {
+						"type": "int",
+						"defaultValue": 0
+					}
+				},
+				"folder": {
+					"name": "DataScience"
+				}
+			}
+		}
+	]
+}
