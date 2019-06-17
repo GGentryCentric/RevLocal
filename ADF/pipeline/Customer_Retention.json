@@ -32,7 +32,8 @@
 		],
 		"parameters": {
 			"Month": {
-				"type": "int"
+				"type": "int",
+				"defaultValue": 0
 			}
 		},
 		"folder": {
