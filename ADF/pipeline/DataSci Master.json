@@ -1,0 +1,68 @@
+{
+	"name": "DataSci Master",
+	"properties": {
+		"activities": [
+			{
+				"name": "Setup",
+				"type": "ExecutePipeline",
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Setup Calendar Month",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Customer Retention",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Set Variables",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Customer_Retention",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Month": {
+							"value": "@variables('Month_One')",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "Set Variables",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Setup",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"typeProperties": {
+					"variableName": "Month_One",
+					"value": "1"
+				}
+			}
+		],
+		"variables": {
+			"Month_One": {
+				"type": "String",
+				"defaultValue": "1"
+			}
+		},
+		"folder": {
+			"name": "DataScience"
+		}
+	}
+}

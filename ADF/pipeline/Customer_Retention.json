@@ -1,5 +1,5 @@
 {
-	"name": "Customer_Retention 1",
+	"name": "Customer_Retention",
 	"properties": {
 		"activities": [
 			{
@@ -27,6 +27,11 @@
 				}
 			}
 		],
+		"parameters": {
+			"Month": {
+				"type": "int"
+			}
+		},
 		"folder": {
 			"name": "DataScience"
 		}
